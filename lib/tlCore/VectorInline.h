@@ -39,6 +39,78 @@ namespace tl
         {}
 
         template<typename T>
+        inline Vector2<T> operator + (const Vector2<T>& value, T t)
+        {
+            return Vector2<T>(value.x + t, value.y + y);
+        }
+
+        template<typename T>
+        inline Vector3<T> operator + (const Vector3<T>& value, T t)
+        {
+            return Vector3<T>(value.x + t, value.y + y, value.z + z);
+        }
+
+        template<typename T>
+        inline Vector4<T> operator + (const Vector4<T>& value, T t)
+        {
+            return Vector4<T>(value.x + t, value.y + y, value.z + z, value.w + w);
+        }
+
+        template<typename T>
+        inline Vector2<T> operator - (const Vector2<T>& value, T t)
+        {
+            return Vector2<T>(value.x - t, value.y - t);
+        }
+
+        template<typename T>
+        inline Vector3<T> operator - (const Vector3<T>& value, T t)
+        {
+            return Vector3<T>(value.x - t, value.y - t, value.z - t);
+        }
+
+        template<typename T>
+        inline Vector4<T> operator - (const Vector4<T>& value, T t)
+        {
+            return Vector4<T>(value.x - t, value.y - t, value.z - t, value.w - t);
+        }
+
+        template<typename T>
+        inline Vector2<T> operator * (const Vector2<T>& value, T t)
+        {
+            return Vector2<T>(value.x * t, value.y * t);
+        }
+
+        template<typename T>
+        inline Vector3<T> operator * (const Vector3<T>& value, T t)
+        {
+            return Vector3<T>(value.x * t, value.y * t, value.z * t);
+        }
+
+        template<typename T>
+        inline Vector4<T> operator * (const Vector4<T>& value, T t)
+        {
+            return Vector4<T>(value.x * t, value.y * t, value.z * t, value.w * t);
+        }
+
+        template<typename T>
+        inline Vector2<T> operator / (const Vector2<T>& value, T t)
+        {
+            return Vector2<T>(value.x / t, value.y / t);
+        }
+
+        template<typename T>
+        inline Vector3<T> operator / (const Vector3<T>& value, T t)
+        {
+            return Vector3<T>(value.x / t, value.y / t, value.z / t);
+        }
+
+        template<typename T>
+        inline Vector4<T> operator / (const Vector4<T>& value, T t)
+        {
+            return Vector4<T>(value.x / t, value.y / t, value.z / t, value.w / t);
+        }
+
+        template<typename T>
         inline bool Vector2<T>::operator == (const Vector2<T>& other) const
         {
             return x == other.x && y == other.y;

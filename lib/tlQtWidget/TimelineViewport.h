@@ -51,7 +51,7 @@ namespace tl
             void setViewPosAndZoom(const tl::math::Vector2i&, float);
 
             //! Set the view zoom.
-            void setViewZoom(float, const tl::math::Vector2i& focus = tl::math::Vector2i());
+            void setViewZoom(float, const tl::math::Vector2i& focus);
 
             //! Frame the view.
             void frameView();

@@ -8,7 +8,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="1.1.2 (0a00cf5339, 2022-02-04, custom)"
-   sodipodi:docname="ViewFrame.svg"
+   sodipodi:docname="ViewZoomIn.svg"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -67,10 +67,9 @@
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96">
       <path
-         id="path5784"
-         style="opacity:1;fill:#f0f0f0;fill-opacity:1;stroke:none;stroke-width:2.82843;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         d="m 1,11 v 2 4 2 H 7 9 V 17 13 11 H 7 3 Z m 2,2 h 4 v 4 H 3 Z"
-         transform="matrix(0.26458333,0,0,0.26458333,0,291.70831)" />
+         style="fill:#f0f0f0;fill-opacity:1;stroke:none;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 1.0583333,294.61873 H 1.5875 v 0.79375 h 0.79375 v 0.52916 H 1.5875 v 0.79375 H 1.0583333 v -0.79375 H 0.26458333 v -0.52916 H 1.0583333 Z"
+         id="path963" />
       <path
          id="path6138-7"
          style="fill:#f0f0f0;fill-opacity:1;stroke:none;stroke-width:0.529167"

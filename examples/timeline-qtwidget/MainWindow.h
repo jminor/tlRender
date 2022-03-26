@@ -6,6 +6,7 @@
 
 #include "TimelineWidget.h"
 
+#include <QAction>
 #include <QMainWindow>
 
 namespace tl
@@ -35,6 +36,8 @@ namespace tl
 
                 std::string _input;
                 otio::SerializableObject::Retainer<otio::Timeline> _otioTimeline;
+
+                QMap<QString, QAction*> _actions;
                 TimelineWidget* _timelineWidget;
             };
         }

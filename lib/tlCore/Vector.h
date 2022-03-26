@@ -58,6 +58,34 @@ namespace tl
             bool operator != (const Vector4<T>&) const;
         };
 
+        template<typename T>
+        Vector2<T> operator + (const Vector2<T>&, T);
+        template<typename T>
+        Vector3<T> operator + (const Vector3<T>&, T);
+        template<typename T>
+        Vector4<T> operator + (const Vector4<T>&, T);
+
+        template<typename T>
+        Vector2<T> operator - (const Vector2<T>&, T);
+        template<typename T>
+        Vector3<T> operator - (const Vector3<T>&, T);
+        template<typename T>
+        Vector4<T> operator - (const Vector4<T>&, T);
+
+        template<typename T>
+        Vector2<T> operator * (const Vector2<T>&, T);
+        template<typename T>
+        Vector3<T> operator * (const Vector3<T>&, T);
+        template<typename T>
+        Vector4<T> operator * (const Vector4<T>&, T);
+
+        template<typename T>
+        Vector2<T> operator / (const Vector2<T>&, T);
+        template<typename T>
+        Vector3<T> operator / (const Vector3<T>&, T);
+        template<typename T>
+        Vector4<T> operator / (const Vector4<T>&, T);
+
         //! Two-dimensional integer vector.
         typedef Vector2<int> Vector2i;
 

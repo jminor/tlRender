@@ -32,10 +32,20 @@ namespace tl
             {
                 setAcceptDrops(true);
 
+                _actions["ZoomIn"] = new QAction(this);
+                _actions["ZoomIn"]->setIcon(QIcon(":/Icons/ViewZoomIn.svg"));
+                _actions["ZoomIn"]->setAutoRepeat(true);
+
+                _actions["ZoomOut"] = new QAction(this);
+                _actions["ZoomOut"]->setIcon(QIcon(":/Icons/ViewZoomOut.svg"));
+                _actions["ZoomOut"]->setAutoRepeat(true);
+
                 auto zoomSpinBox = new QDoubleSpinBox;
                 zoomSpinBox->setRange(1.0, 1000.0);
 
                 auto toolBar = addToolBar("Tool Bar");
+                toolBar->addAction(_actions["ZoomIn"]);
+                toolBar->addAction(_actions["ZoomOut"]);
                 toolBar->addWidget(zoomSpinBox);
 
                 _timelineWidget = new TimelineWidget;
@@ -44,16 +54,36 @@ namespace tl
                 scrollArea->setWidget(_timelineWidget);
                 setCentralWidget(scrollArea);
 
-                zoomSpinBox->setValue(_timelineWidget->zoom().x);
+                zoomSpinBox->setValue(_timelineWidget->zoom());
+
+                connect(
+                    _actions["ZoomIn"],
+                    SIGNAL(triggered()),
+                    _timelineWidget,
+                    SLOT(zoomIn()));
+
+                connect(
+                    _actions["ZoomOut"],
+                    SIGNAL(triggered()),
+                    _timelineWidget,
+                    SLOT(zoomOut()));
 
                 connect(
                     zoomSpinBox,
                     QOverload<double>::of(&QDoubleSpinBox::valueChanged),
                     [this](double value)
                     {
-                        _timelineWidget->setZoom(math::Vector2f(value, value));
+                        _timelineWidget->setZoom(value, _timelineWidget->viewportCenter());
                     });
 
+                connect(
+                    _timelineWidget,
+                    &TimelineWidget::zoomChanged,
+                    [zoomSpinBox](float value)
+                    {
+                        zoomSpinBox->setValue(value);
+                    });
+                
                 if (!input.empty())
                 {
                     _open(input);
@@ -63,10 +93,10 @@ namespace tl
 
                 _otioTimeline = new otio::Timeline;
                 otio::ErrorStatus errorStatus;
-                for (int i = 0; i < 1000; ++i)
+                for (int i = 0; i < 50; ++i)
                 {
                     auto otioTrack = new otio::Track;
-                    for (int j = 0; j < 100; ++j)
+                    for (int j = 0; j < 50; ++j)
                     {
                         switch (math::random(math::IntRange(0, 1)))
                         {
@@ -75,7 +105,7 @@ namespace tl
                             auto otioClip = new otio::Clip;
                             otioClip->set_source_range(otime::TimeRange(
                                 otime::RationalTime(0.0, 24.0),
-                                otime::RationalTime(math::random(math::FloatRange(3.0, 60.0 * 24.0)), 24.0)));
+                                otime::RationalTime(math::random(math::FloatRange(3.0, 9.0 * 24.0)), 24.0)));
                             otioTrack->append_child(otioClip, &errorStatus);
                             break;
                         }
@@ -84,7 +114,7 @@ namespace tl
                             auto otioGap = new otio::Gap;
                             otioGap->set_source_range(otime::TimeRange(
                                 otime::RationalTime(0.0, 24.0),
-                                otime::RationalTime(math::random(math::FloatRange(3.0, 60.0 * 24.0)), 24.0)));
+                                otime::RationalTime(math::random(math::FloatRange(3.0, 9.0 * 24.0)), 24.0)));
                             otioTrack->append_child(otioGap, &errorStatus);
                             break;
                         }

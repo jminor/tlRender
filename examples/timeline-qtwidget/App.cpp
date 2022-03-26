@@ -6,6 +6,8 @@
 
 #include "MainWindow.h"
 
+#include <tlQtWidget/Style.h>
+
 #include <tlCore/Math.h>
 #include <tlCore/StringFormat.h>
 #include <tlCore/Time.h>
@@ -46,6 +48,8 @@ namespace tl
                 QCoreApplication::setOrganizationName("tlRender");
                 QCoreApplication::setApplicationName("timeline-qwidget");
                 setStyle("Fusion");
+                setPalette(qtwidget::darkStyle());
+                setStyleSheet(qtwidget::styleSheet());
 
                 // Create the main window.
                 auto mainWindow = new MainWindow(_input);
