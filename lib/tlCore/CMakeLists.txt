@@ -41,6 +41,7 @@ set(HEADERS
     Observer.h
     Path.h
     PathInline.h
+	Random.h
     Range.h
     RangeInline.h
     String.h
@@ -72,6 +73,7 @@ set(SOURCE
 	OCIO.cpp
 	OS.cpp
     Path.cpp
+	Random.cpp
     String.cpp
     StringFormat.cpp
     Time.cpp
