@@ -36,14 +36,17 @@ namespace tl
                 _actions["ZoomIn"] = new QAction(this);
                 _actions["ZoomIn"]->setIcon(QIcon(":/Icons/ViewZoomIn.svg"));
                 _actions["ZoomIn"]->setAutoRepeat(true);
+                _actions["ZoomIn"]->setToolTip(tr("Zoom in"));
 
                 _actions["ZoomOut"] = new QAction(this);
                 _actions["ZoomOut"]->setIcon(QIcon(":/Icons/ViewZoomOut.svg"));
                 _actions["ZoomOut"]->setAutoRepeat(true);
+                _actions["ZoomOut"]->setToolTip(tr("Zoom in"));
 
                 auto zoomSpinBox = new QDoubleSpinBox;
-                zoomSpinBox->setRange(0.1, 1000.0);
+                zoomSpinBox->setRange(0.1, 10.0);
                 zoomSpinBox->setSingleStep(0.1);
+                zoomSpinBox->setToolTip(tr("Zoom"));
 
                 auto toolBar = addToolBar("Tool Bar");
                 toolBar->addAction(_actions["ZoomIn"]);
@@ -51,6 +54,7 @@ namespace tl
                 toolBar->addWidget(zoomSpinBox);
 
                 _timelineWidget = new TimelineWidget;
+                _timelineWidget->setFrameShape(QFrame::NoFrame);
                 auto scrollArea = new QScrollArea;
                 scrollArea->setWidgetResizable(true);
                 scrollArea->setWidget(_timelineWidget);
@@ -93,40 +97,62 @@ namespace tl
 
                 resize(1280, 720);
 
-                _otioTimeline = new otio::Timeline;
-                otio::ErrorStatus errorStatus;
-                for (int i = 0; i < 50; ++i)
+                _timelineWidget->setFocus();
+
+                if (1)
                 {
-                    auto otioTrack = new otio::Track;
-                    for (int j = 0; j < 50; ++j)
+                    const math::Vector2i count(50, 50);
+                    _otioTimeline = new otio::Timeline;
+                    otio::ErrorStatus errorStatus;
+                    for (int i = 0; i < count.y; ++i)
                     {
-                        switch (math::random(math::IntRange(0, 1)))
+                        auto otioTrack = new otio::Track;
+                        otio::Item* otioItemPrev = nullptr;
+                        for (int j = 0; j < count.x; ++j)
                         {
-                        case 0:
-                        {
-                            auto otioClip = new otio::Clip;
-                            otioClip->set_name(string::Format("clip {0}").arg(math::random(math::IntRange(0, 1000))));
-                            otioClip->set_source_range(otime::TimeRange(
-                                otime::RationalTime(0, 24),
-                                otime::RationalTime(math::random(math::IntRange(3, 9 * 24)), 24)));
-                            otioTrack->append_child(otioClip, &errorStatus);
-                            break;
+                            int index = math::random(math::IntRange(0, 1));
+                            if (!otioItemPrev ||
+                                (1 == index && dynamic_cast<otio::Gap*>(otioItemPrev)) ||
+                                j == (count.x - 1))
+                            {
+                                index = 0;
+                            }
+                            
+                            otio::Item* otioItem = nullptr;
+                            switch (index)
+                            {
+                            case 0:
+                            {
+                                auto otioClip = new otio::Clip;
+                                otioClip->set_name(string::Format("{0}").arg(math::random(math::IntRange(0, 1000))));
+                                otioClip->set_source_range(otime::TimeRange(
+                                    otime::RationalTime(0, 24),
+                                    otime::RationalTime(math::random(math::IntRange(3, 6 * 24)), 24)));
+                                otioItem = otioClip;
+                                break;
+                            }
+                            case 1:
+                            {
+                                auto otioGap = new otio::Gap;
+                                otioGap->set_source_range(otime::TimeRange(
+                                    otime::RationalTime(0, 24),
+                                    otime::RationalTime(math::random(math::IntRange(3, 12 * 24)), 24)));
+                                otioItem = otioGap;
+                                break;
+                            }
+                            default: break;
+                            }
+
+                            if (otioItem)
+                            {
+                                otioTrack->append_child(otioItem, &errorStatus);
+                            }
+                            otioItemPrev = otioItem;
                         }
-                        case 1:
-                        {
-                            auto otioGap = new otio::Gap;
-                            otioGap->set_source_range(otime::TimeRange(
-                                otime::RationalTime(0.0, 24.0),
-                                otime::RationalTime(math::random(math::FloatRange(3.0, 9.0 * 24.0)), 24.0)));
-                            otioTrack->append_child(otioGap, &errorStatus);
-                            break;
-                        }
-                        default: break;
-                        }
+                        _otioTimeline->tracks()->append_child(otioTrack, &errorStatus);
                     }
-                    _otioTimeline->tracks()->append_child(otioTrack, &errorStatus);
+                    _timelineWidget->setTimeline(_otioTimeline);
                 }
-                _timelineWidget->setTimeline(_otioTimeline);
             }
 
             void MainWindow::dragEnterEvent(QDragEnterEvent* event)

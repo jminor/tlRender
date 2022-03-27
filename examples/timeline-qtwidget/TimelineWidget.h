@@ -55,6 +55,13 @@ namespace tl
                 void wheelEvent(QWheelEvent*) override;
 
             private:
+                float _timeIndicatorHeight() const;
+
+                void _tracksPaint(QPainter&, const math::BBox2f& viewportBBox);
+                void _itemsPaint(QPainter&, const math::BBox2f& viewportBBox);
+                void _transitionsPaint(QPainter&, const math::BBox2f& viewportBBox);
+                void _timeIndicatorPaint(QPainter&, const math::BBox2f& viewportBBox);
+
                 void _itemsUpdate();
                 void _scrollBarsUpdate();
 
@@ -66,13 +73,12 @@ namespace tl
                 struct Item
                 {
                     otio::Item* p = nullptr;
-                    math::BBox2f bbox;
-                    QString nameLabel;
-                    QSize nameLabelSize;
-                    QString sourceRangeLabel;
-                    QSize sourceRangeLabelSize;
+                    otime::TimeRange range;
+                    int track = 0;
+                    QColor color;
+                    QMap<QString, QPair<QString, QSize> > labels;
                 };
-                std::vector<Item> _clips;
+                std::vector<Item> _items;
 
                 QMap<QString, QAction*> _actions;
 

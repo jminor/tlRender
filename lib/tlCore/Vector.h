@@ -59,32 +59,32 @@ namespace tl
         };
 
         template<typename T>
-        Vector2<T> operator + (const Vector2<T>&, T);
+        constexpr Vector2<T> operator + (const Vector2<T>&, T);
         template<typename T>
-        Vector3<T> operator + (const Vector3<T>&, T);
+        constexpr Vector3<T> operator + (const Vector3<T>&, T);
         template<typename T>
-        Vector4<T> operator + (const Vector4<T>&, T);
+        constexpr Vector4<T> operator + (const Vector4<T>&, T);
 
         template<typename T>
-        Vector2<T> operator - (const Vector2<T>&, T);
+        constexpr Vector2<T> operator - (const Vector2<T>&, T);
         template<typename T>
-        Vector3<T> operator - (const Vector3<T>&, T);
+        constexpr Vector3<T> operator - (const Vector3<T>&, T);
         template<typename T>
-        Vector4<T> operator - (const Vector4<T>&, T);
+        constexpr Vector4<T> operator - (const Vector4<T>&, T);
 
         template<typename T>
-        Vector2<T> operator * (const Vector2<T>&, T);
+        constexpr Vector2<T> operator * (const Vector2<T>&, T);
         template<typename T>
-        Vector3<T> operator * (const Vector3<T>&, T);
+        constexpr Vector3<T> operator * (const Vector3<T>&, T);
         template<typename T>
-        Vector4<T> operator * (const Vector4<T>&, T);
+        constexpr Vector4<T> operator * (const Vector4<T>&, T);
 
         template<typename T>
-        Vector2<T> operator / (const Vector2<T>&, T);
+        constexpr Vector2<T> operator / (const Vector2<T>&, T);
         template<typename T>
-        Vector3<T> operator / (const Vector3<T>&, T);
+        constexpr Vector3<T> operator / (const Vector3<T>&, T);
         template<typename T>
-        Vector4<T> operator / (const Vector4<T>&, T);
+        constexpr Vector4<T> operator / (const Vector4<T>&, T);
 
         //! Two-dimensional integer vector.
         typedef Vector2<int> Vector2i;
