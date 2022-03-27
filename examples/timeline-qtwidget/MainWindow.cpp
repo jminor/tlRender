@@ -7,6 +7,7 @@
 #include "App.h"
 
 #include <tlCore/Random.h>
+#include <tlCore/StringFormat.h>
 
 #include <opentimelineio/clip.h>
 #include <opentimelineio/gap.h>
@@ -41,7 +42,8 @@ namespace tl
                 _actions["ZoomOut"]->setAutoRepeat(true);
 
                 auto zoomSpinBox = new QDoubleSpinBox;
-                zoomSpinBox->setRange(1.0, 1000.0);
+                zoomSpinBox->setRange(0.1, 1000.0);
+                zoomSpinBox->setSingleStep(0.1);
 
                 auto toolBar = addToolBar("Tool Bar");
                 toolBar->addAction(_actions["ZoomIn"]);
@@ -103,9 +105,10 @@ namespace tl
                         case 0:
                         {
                             auto otioClip = new otio::Clip;
+                            otioClip->set_name(string::Format("clip {0}").arg(math::random(math::IntRange(0, 1000))));
                             otioClip->set_source_range(otime::TimeRange(
-                                otime::RationalTime(0.0, 24.0),
-                                otime::RationalTime(math::random(math::FloatRange(3.0, 9.0 * 24.0)), 24.0)));
+                                otime::RationalTime(0, 24),
+                                otime::RationalTime(math::random(math::IntRange(3, 9 * 24)), 24)));
                             otioTrack->append_child(otioClip, &errorStatus);
                             break;
                         }

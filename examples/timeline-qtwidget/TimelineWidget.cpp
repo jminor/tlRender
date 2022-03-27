@@ -4,6 +4,8 @@
 
 #include "TimelineWidget.h"
 
+#include <tlCore/StringFormat.h>
+
 #include <opentimelineio/clip.h>
 #include <opentimelineio/gap.h>
 
@@ -17,6 +19,14 @@ namespace tl
     {
         namespace timeline_qtwidget
         {
+            namespace
+            {
+                const float itemWidth = 100.F;
+                const float itemHeight = 100.F;
+                const float itemMargin = 2.F;
+                const float itemBorder = 2.F;
+            }
+
             TimelineWidget::TimelineWidget(QWidget* parent) :
                 QAbstractScrollArea(parent)
             {
@@ -96,7 +106,7 @@ namespace tl
 
             void TimelineWidget::zoomReset()
             {
-                setZoom(100.F, _mouseInside ? _mousePos : viewportCenter());
+                setZoom(1.F, _mouseInside ? _mousePos : viewportCenter());
             }
 
             void TimelineWidget::zoomIn()
@@ -117,33 +127,110 @@ namespace tl
             void TimelineWidget::paintEvent(QPaintEvent*)
             {
                 QPainter painter(viewport());
+                const QPalette palette = this->palette();
+                QFontMetrics fm(font());
+                const float fl = fm.lineSpacing();
+                const float fa = fm.ascent();
+                const float fd = fm.descent();
+                painter.setFont(font());
 
                 const int w = viewport()->width();
                 const int h = viewport()->height();
                 const int hs = horizontalScrollBar()->value();
                 const int vs = verticalScrollBar()->value();
                 const math::BBox2f viewport(
-                    hs / _zoom,
-                    vs / _zoom,
-                    w / _zoom,
-                    h / _zoom);
+                    hs / _zoom / itemWidth,
+                    vs / _zoom / itemHeight,
+                    w / _zoom / itemWidth,
+                    h / _zoom / itemHeight);
 
-                painter.setPen(QPen(QColor(0, 0, 0), 1));
-                painter.setBrush(QColor(255, 0, 0));
-                for (const auto& row : _items)
+                // Time marks.
+                QVector<QRectF> timeRects;
+                for (float x = floorf(viewport.min.x); x < ceilf(viewport.max.x); x += 1.F)
                 {
-                    for (const auto& item : row)
+                    timeRects.append(QRect(
+                        ((x * itemWidth - hs / _zoom) * _zoom),
+                        0.F,
+                        1.F,
+                        h));
+                }
+                painter.setPen(Qt::NoPen);
+                painter.setBrush(palette.color(QPalette::ColorRole::Mid));
+                painter.drawRects(timeRects);
+
+                // Clips.
+                QVector<QRectF> lightRects;
+                QVector<QRectF> buttonRects;
+                QVector<QRectF> nameRects;
+                QVector<QString> nameLabels;
+                QVector<QRectF> sourceRangeRects;
+                QVector<QString> sourceRangeLabels;
+                for (auto& clip : _clips)
+                {
+                    if (clip.bbox.intersects(viewport))
                     {
-                        if (ItemType::Clip == item.type && item.bbox.intersects(viewport))
+                        math::BBox2f bbox(
+                            ((clip.bbox.min.x * itemWidth - hs / _zoom) * _zoom),
+                            ((clip.bbox.min.y * itemHeight - vs / _zoom) * _zoom),
+                            (clip.bbox.w() * itemWidth * _zoom),
+                            (clip.bbox.h() * itemHeight * _zoom));
+
+                        bbox = bbox.margin(-itemMargin);
+                        lightRects.append(QRectF(bbox.min.x, bbox.min.y, bbox.w(), bbox.h()));
+
+                        bbox = bbox.margin(-itemBorder);
+                        buttonRects.append(QRectF(bbox.min.x, bbox.min.y, bbox.w(), bbox.h()));
+
+                        bbox = bbox.margin(-itemMargin);
+                        const math::BBox2f nameBBox(
+                            bbox.min.x,
+                            bbox.min.y,
+                            bbox.w() * .75F,
+                            std::min(fl, bbox.h()));
+                        if (clip.nameLabelSize.width() <= nameBBox.w() &&
+                            clip.nameLabelSize.height() <= nameBBox.h())
                         {
-                            const math::BBox2f bbox = math::BBox2f(
-                                (item.bbox.min.x - hs / _zoom) * _zoom,
-                                (item.bbox.min.y - vs / _zoom) * _zoom,
-                                item.bbox.w() * _zoom,
-                                item.bbox.h() * _zoom);
-                            painter.drawRect(bbox.min.x, bbox.min.y, bbox.w(), bbox.h());
+                            nameRects.append(QRectF(nameBBox.min.x, nameBBox.min.y, nameBBox.w(), nameBBox.h()));
+                            nameLabels.append(clip.nameLabel);
+                        }
+
+                        const math::BBox2f sourceRangeBBox(
+                            bbox.min.x + bbox.w() * .75F,
+                            bbox.min.y,
+                            bbox.w() * .25F,
+                            bbox.h() / 2.F);
+                        if (clip.sourceRangeLabelSize.width() <= sourceRangeBBox.w() &&
+                            clip.sourceRangeLabelSize.height() <= sourceRangeBBox.h())
+                        {
+                            nameRects.append(QRectF(
+                                sourceRangeBBox.max.x - clip.sourceRangeLabelSize.width(),
+                                sourceRangeBBox.min.y,
+                                clip.sourceRangeLabelSize.width(),
+                                sourceRangeBBox.h()));
+                            nameLabels.append(clip.sourceRangeLabel);
                         }
                     }
+                }
+                painter.setPen(Qt::NoPen);
+                painter.setBrush(palette.color(QPalette::ColorRole::Light));
+                painter.drawRects(lightRects);
+                painter.setBrush(palette.color(QPalette::ColorRole::Button));
+                painter.drawRects(buttonRects);
+                painter.setPen(palette.color(QPalette::ColorRole::WindowText));
+                painter.setBrush(Qt::NoBrush);
+                for (size_t i = 0; i < nameRects.size(); ++i)
+                {
+                    painter.drawText(
+                        nameRects[i].x(),
+                        nameRects[i].y() + fa,
+                        nameLabels[i]);
+                }
+                for (size_t i = 0; i < sourceRangeRects.size(); ++i)
+                {
+                    painter.drawText(
+                        sourceRangeRects[i].x(),
+                        sourceRangeRects[i].y() + fa,
+                        sourceRangeLabels[i]);
                 }
             }
 
@@ -205,16 +292,14 @@ namespace tl
 
             void TimelineWidget::_itemsUpdate()
             {
-                _items.clear();
+                _clips.clear();
 
-                const float itemHeight = 1.F;
-
+                QFontMetrics fm(font());
                 float y = 0.F;
                 for (const auto& child : _otioTimeline->tracks()->children())
                 {
                     if (auto otioTrack = dynamic_cast<otio::Track*>(child.value))
                     {
-                        std::vector<Item> items;
                         for (const auto& trackChild : otioTrack->children())
                         {
                             if (auto otioItem = dynamic_cast<otio::Item*>(trackChild.value))
@@ -230,27 +315,40 @@ namespace tl
 
                                     Item item;
                                     item.p = otioItem;
-                                    if (auto otioClip = dynamic_cast<otio::Clip*>(otioItem))
-                                    {
-                                        item.type = ItemType::Clip;
-                                    }
-                                    else if (auto otioGap = dynamic_cast<otio::Gap*>(otioItem))
-                                    {
-                                        item.type = ItemType::Gap;
-                                    }
                                     item.bbox = math::BBox2f(
                                         trimmedRangeScaled.start_time().value(),
                                         y,
                                         trimmedRangeScaled.duration().value(),
-                                        itemHeight);
-                                    items.push_back(item);
+                                        1.F);
+                                    item.nameLabel = QString::fromUtf8(otioItem->name().c_str());
+                                    if (auto otioClip = dynamic_cast<otio::Clip*>(otioItem))
+                                    {
+                                        if (item.nameLabel.isEmpty())
+                                        {
+                                            if (auto mediaRef = otioClip->media_reference())
+                                            {
+                                                item.nameLabel = QString::fromUtf8(mediaRef->name().c_str());
+                                            }
+                                        }
+                                        item.nameLabelSize = fm.size(Qt::TextSingleLine, item.nameLabel);
+                                        const auto sourceRangeOpt = otioClip->source_range();
+                                        if (sourceRangeOpt.has_value())
+                                        {
+                                            const std::string label = string::Format("{0}:{1}@{2}").
+                                                arg(sourceRangeOpt->start_time().value()).
+                                                arg(sourceRangeOpt->duration().value()).
+                                                arg(sourceRangeOpt->duration().rate());
+                                            item.sourceRangeLabel = QString::fromUtf8(label.c_str());
+                                        }
+                                        item.sourceRangeLabelSize = fm.size(Qt::TextSingleLine, item.sourceRangeLabel);
+                                        _clips.push_back(item);
+                                    }
                                 }
                             }
                         }
-                        _items.push_back(items);
                     }
 
-                    y += itemHeight;
+                    y += 1.F;
                 }
             }
 
@@ -259,8 +357,8 @@ namespace tl
                 const QSize viewportSize = viewport()->size();
                 horizontalScrollBar()->setPageStep(viewportSize.width());
                 verticalScrollBar()->setPageStep(viewportSize.height());
-                horizontalScrollBar()->setRange(0, _duration.value() * _zoom - viewportSize.width());
-                verticalScrollBar()->setRange(0, _tracks * _zoom - viewportSize.height());
+                horizontalScrollBar()->setRange(0, _duration.value() * itemWidth * _zoom - viewportSize.width());
+                verticalScrollBar()->setRange(0, _tracks * itemHeight * _zoom - viewportSize.height());
             }
         }
     }

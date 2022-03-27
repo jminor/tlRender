@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include <tlCore/Time.h>
 #include <tlCore/BBox.h>
+#include <tlCore/Time.h>
 
 #include <opentimelineio/timeline.h>
 
@@ -61,21 +61,18 @@ namespace tl
                 otio::SerializableObject::Retainer<otio::Timeline> _otioTimeline;
                 otime::RationalTime _duration;
                 int _tracks = 0;
-                float _zoom = 100.F;
+                float _zoom = 1.F;
 
-                enum class ItemType
-                {
-                    None,
-                    Clip,
-                    Gap
-                };
                 struct Item
                 {
                     otio::Item* p = nullptr;
-                    ItemType type = ItemType::None;
                     math::BBox2f bbox;
+                    QString nameLabel;
+                    QSize nameLabelSize;
+                    QString sourceRangeLabel;
+                    QSize sourceRangeLabelSize;
                 };
-                std::vector<std::vector<Item> > _items;
+                std::vector<Item> _clips;
 
                 QMap<QString, QAction*> _actions;
 
