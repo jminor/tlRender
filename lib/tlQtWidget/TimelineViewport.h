@@ -34,6 +34,9 @@ namespace tl
             //! Set the image options.
             void setImageOptions(const std::vector<timeline::ImageOptions>&);
 
+            //! Set the display options.
+            void setDisplayOptions(const std::vector<timeline::DisplayOptions>&);
+
             //! Set the comparison options.
             void setCompareOptions(const timeline::CompareOptions&);
 
@@ -91,10 +94,11 @@ namespace tl
             void wheelEvent(QWheelEvent*) override;
 
         private:
-            imaging::Size _viewportSize() const;
-            imaging::Size _renderSize() const;
+            imaging::Size _getViewportSize() const;
+            std::vector<imaging::Size> _getTimelineSizes() const;
+            imaging::Size _getRenderSize() const;
+            math::Vector2i _getViewportCenter() const;
             void _frameView();
-            math::Vector2i _center() const;
 
             TLRENDER_PRIVATE();
         };

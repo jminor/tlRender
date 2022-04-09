@@ -2,6 +2,7 @@ set(HEADERS
     Mesh.h
     OffscreenBuffer.h
     Render.h
+	RenderPrivate.h
     Shader.h
     Texture.h
     Util.h)
@@ -10,6 +11,9 @@ set(SOURCE
     Mesh.cpp
     OffscreenBuffer.cpp
     Render.cpp
+	RenderPrims.cpp
+	RenderShaders.cpp
+	RenderVideo.cpp
     Shader.cpp
     Texture.cpp
     Util.cpp)

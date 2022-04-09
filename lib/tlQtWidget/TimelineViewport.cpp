@@ -27,6 +27,7 @@ namespace tl
             std::weak_ptr<system::Context> context;
             imaging::ColorConfig colorConfig;
             std::vector<timeline::ImageOptions> imageOptions;
+            std::vector<timeline::DisplayOptions> displayOptions;
             timeline::CompareOptions compareOptions;
             std::vector<qt::TimelinePlayer*> timelinePlayers;
             math::Vector2i viewPos;
@@ -80,6 +81,15 @@ namespace tl
             if (options == p.imageOptions)
                 return;
             p.imageOptions = options;
+            update();
+        }
+
+        void TimelineViewport::setDisplayOptions(const std::vector<timeline::DisplayOptions>& options)
+        {
+            TLRENDER_P();
+            if (options == p.displayOptions)
+                return;
+            p.displayOptions = options;
             update();
         }
 
@@ -162,19 +172,19 @@ namespace tl
         void TimelineViewport::viewZoom1To1()
         {
             TLRENDER_P();
-            setViewZoom(1.F, p.mouseInside ? p.mousePos : _center());
+            setViewZoom(1.F, p.mouseInside ? p.mousePos : _getViewportCenter());
         }
 
         void TimelineViewport::viewZoomIn()
         {
             TLRENDER_P();
-            setViewZoom(p.viewZoom * 2.F, p.mouseInside ? p.mousePos : _center());
+            setViewZoom(p.viewZoom * 2.F, p.mouseInside ? p.mousePos : _getViewportCenter());
         }
 
         void TimelineViewport::viewZoomOut()
         {
             TLRENDER_P();
-            setViewZoom(p.viewZoom / 2.F, p.mouseInside ? p.mousePos : _center());
+            setViewZoom(p.viewZoom / 2.F, p.mouseInside ? p.mousePos : _getViewportCenter());
         }
 
         void TimelineViewport::_videoCallback(const timeline::VideoData& value)
@@ -204,14 +214,10 @@ namespace tl
                 const std::string vertexSource =
                     "#version 410\n"
                     "\n"
-                    "// Inputs\n"
                     "in vec3 vPos;\n"
                     "in vec2 vTexture;\n"
-                    "\n"
-                    "// Outputs\n"
                     "out vec2 fTexture;\n"
                     "\n"
-                    "// Uniforms\n"
                     "uniform struct Transform\n"
                     "{\n"
                     "    mat4 mvp;\n"
@@ -225,13 +231,9 @@ namespace tl
                 const std::string fragmentSource =
                     "#version 410\n"
                     "\n"
-                    "// Inputs\n"
                     "in vec2 fTexture;\n"
-                    "\n"
-                    "// Outputs\n"
                     "out vec4 fColor;\n"
                     "\n"
-                    "// Uniforms\n"
                     "uniform sampler2D textureSampler;\n"
                     "\n"
                     "void main()\n"
@@ -265,7 +267,7 @@ namespace tl
         {
             TLRENDER_P();
 
-            const auto renderSize = _renderSize();
+            const auto renderSize = _getRenderSize();
             try
             {
                 if (renderSize.isValid())
@@ -291,7 +293,12 @@ namespace tl
                 {
                     gl::OffscreenBufferBinding binding(p.buffer);
                     p.render->begin(renderSize);
-                    p.render->drawVideo(p.videoData, p.imageOptions, p.compareOptions);
+                    p.render->drawVideo(
+                        p.videoData,
+                        timeline::tiles(p.compareOptions.mode, _getTimelineSizes()),
+                        p.imageOptions,
+                        p.displayOptions,
+                        p.compareOptions);
                     p.render->end();
                 }
             }
@@ -306,7 +313,7 @@ namespace tl
                 }
             }
 
-            const auto viewportSize = _viewportSize();
+            const auto viewportSize = _getViewportSize();
             glViewport(
                 0,
                 0,
@@ -438,7 +445,7 @@ namespace tl
             }
         }
         
-        imaging::Size TimelineViewport::_viewportSize() const
+        imaging::Size TimelineViewport::_getViewportSize() const
         {
             const float devicePixelRatio = window()->devicePixelRatio();
             return imaging::Size(
@@ -446,7 +453,7 @@ namespace tl
                 height() * devicePixelRatio);
         }
 
-        imaging::Size TimelineViewport::_renderSize() const
+        std::vector<imaging::Size> TimelineViewport::_getTimelineSizes() const
         {
             TLRENDER_P();
             std::vector<imaging::Size> sizes;
@@ -458,14 +465,25 @@ namespace tl
                     sizes.push_back(ioInfo.video[0].size);
                 }
             }
-            return timeline::getRenderSize(p.compareOptions.mode, sizes);
+            return sizes;
+        }
+
+        imaging::Size TimelineViewport::_getRenderSize() const
+        {
+            return timeline::getRenderSize(_p->compareOptions.mode, _getTimelineSizes());
+        }
+
+        math::Vector2i TimelineViewport::_getViewportCenter() const
+        {
+            const auto viewportSize = _getViewportSize();
+            return math::Vector2i(viewportSize.w / 2, viewportSize.h / 2);
         }
 
         void TimelineViewport::_frameView()
         {
             TLRENDER_P();
-            const auto viewportSize = _viewportSize();
-            const auto renderSize = _renderSize();
+            const auto viewportSize = _getViewportSize();
+            const auto renderSize = _getRenderSize();
             float zoom = viewportSize.w / static_cast<float>(renderSize.w);
             if (zoom * renderSize.h > viewportSize.h)
             {
@@ -478,12 +496,6 @@ namespace tl
             update();
             Q_EMIT viewPosAndZoomChanged(p.viewPos, p.viewZoom);
             Q_EMIT frameViewActivated();
-        }
-
-        math::Vector2i TimelineViewport::_center() const
-        {
-            const auto viewportSize = _viewportSize();
-            return math::Vector2i(viewportSize.w / 2, viewportSize.h / 2);
         }
     }
 }
