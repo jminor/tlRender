@@ -52,16 +52,22 @@ namespace tl
 
             p.inputListView = new QListView;
             p.inputListView->setAlternatingRowColors(true);
+            p.inputListView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+            p.inputListView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
             p.inputListView->setSelectionMode(QAbstractItemView::NoSelection);
             p.inputListView->setModel(new ColorInputListModel(colorModel, this));
 
             p.displayListView = new QListView;
             p.displayListView->setAlternatingRowColors(true);
+            p.displayListView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+            p.displayListView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
             p.displayListView->setSelectionMode(QAbstractItemView::NoSelection);
             p.displayListView->setModel(new ColorDisplayListModel(colorModel, this));
 
             p.viewListView = new QListView;
             p.viewListView->setAlternatingRowColors(true);
+            p.viewListView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+            p.viewListView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
             p.viewListView->setSelectionMode(QAbstractItemView::NoSelection);
             p.viewListView->setModel(new ColorViewListModel(colorModel, this));
 

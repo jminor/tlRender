@@ -39,6 +39,8 @@ namespace tl
             p.treeView = new QTreeView;
             p.treeView->setAllColumnsShowFocus(true);
             p.treeView->setAlternatingRowColors(true);
+            p.treeView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+            p.treeView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
             p.treeView->setSelectionMode(QAbstractItemView::NoSelection);
             p.treeView->setIndentation(0);
             p.treeView->setModel(p.infoModel);
